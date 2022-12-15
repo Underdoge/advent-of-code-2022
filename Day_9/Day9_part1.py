@@ -1,54 +1,39 @@
-# Python program to demonstrate
-# 8 bit game
 
-
-import pygame
-import sys
-import random
 import pandas as pd
+import pygame
 
 
-# initialize the constructor
-pygame.init()
-res = (1280,700)
 
-screen = pygame.display.set_mode(res)
-clock = pygame.time.Clock()
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-white = (255, 255, 255)
-color_list = [red, green, blue]
+def print_tail_positions(tail_positions,screen,block_size,tail_c):
+    for pos in tail_positions:
+        pygame.draw.rect(screen, tail_c, [pos[0], pos[1], block_size,block_size])
 
-# randomly assigns a colour from color_list
-# to player
-head_c = green
-start_c = blue
-tail_c = red
-
-width = screen.get_width()
-height = screen.get_height()
-
-# game title
-speed = 60
-
-count = 0
-rgb = random.choice(color_list)
-
-# function for body of the game
 def rope(dir,distance):
+    pygame.init()
+    screen = pygame.display.set_mode()
+    width, height = screen.get_size()
+    res = (width -100, height -200)
+    screen = pygame.display.set_mode(res)
+    clock = pygame.time.Clock()
+    red = (255, 0, 0)
+    green = (0, 255, 0)
+    blue = (0, 0, 255)
+    white = (255, 255, 255)
+    orange = (255, 165, 0)
+    head_c = green
+    start_c = blue
+    tail_c = red
+    speed = 60
     tail_positions = []
-    milisecs = 700
+    milisecs = 50
     instruction = 1
-    block_size = 10
+    block_size = 5
     df_movements = pd.DataFrame({'dir':dir,'steps':distance})
     steps = df_movements.iloc[0]['steps']
     dist = steps
     max_steps = int(max(df_movements.steps))
-
     while max_steps*block_size > res[0]:
         block_size = int( block_size / 2)
-
     head_x = int(res[0]/2) - int((max_steps * block_size ) / 2)
     head_y = int(res[1]/2) + int((max_steps * block_size ) / 2)
     start_x = head_x
@@ -56,9 +41,7 @@ def rope(dir,distance):
     start_y = head_y
     tail_y = head_y
     tail_positions.append((tail_x,tail_y))
-    print(tail_positions)
-    
-    time = int(pygame.time.get_ticks() / milisecs) + 2 # wait 1 second before starting
+    time = int(pygame.time.get_ticks() / milisecs)
     smallfont = pygame.font.SysFont('Anonymice Powerline', 35)
     text2 = smallfont.render(f"Press 'r' to restart, 'p' to pause or 'q' to exit ...", True, white)
     text2_x,text2_y = smallfont.size(f"Press 'r' to restart, 'p' to pause or 'q' to exit ...")
@@ -69,7 +52,7 @@ def rope(dir,distance):
     screen.fill((65, 25, 64))
     screen.blit(text3, (res[0]/2 - (text3_x/2), res[1]-100))
     screen.blit(text5, (res[0]/2 - (text5_x/2), res[1]-700))
-    
+
     key = pygame.key.get_pressed()
     running = True
     started = False
@@ -107,26 +90,28 @@ def rope(dir,distance):
                 time += 1
             if key[pygame.K_p]: # pause
                 started = False
-                
+            if ((tail_x,tail_y) not in tail_positions):
+                    tail_positions.append((tail_x,tail_y))
             if len(df_movements) == 0 and steps == dist:
                 if key[pygame.K_q]: # quit
                     running = False
                 screen.fill((65, 25, 64))
                 pygame.draw.rect(screen, start_c, [start_x, start_y, block_size,block_size])         
                 pygame.draw.rect(screen, head_c, [head_x, head_y, block_size,block_size])
-                screen.blit(text, (res[0]/2 - (text_x/2), res[1]-100))
+                print_tail_positions(tail_positions,screen,block_size,orange)
                 screen.blit(text2, (res[0]/2 - (text2_x/2), res[1]-50))
                 text5 = smallfont.render(f"Tail positions: {len(tail_positions)}", True, white)
                 text5_x,text5_y = smallfont.size(f"Tail positions: {len(tail_positions)}")
                 screen.blit(text5, (res[0]/2 - (text5_x/2), res[1]-700))
+                started = False
             else:
                 if key[pygame.K_DOWN]:
-                    if milisecs > 100:
+                    if milisecs > 50:
                         milisecs -= 50
                 if key[pygame.K_UP]:
                     milisecs += 50
                 screen.fill((65, 25, 64))
-                if steps == dist:
+                if steps == dist and len(df_movements) > 0:
                     movement = df_movements.iloc[0]
                     df_movements = df_movements.iloc[1: , :]
                     dist = movement['steps']
@@ -135,6 +120,7 @@ def rope(dir,distance):
                     instruction += 1
                 else:
                     steps += 1
+
                 if movement['dir'] == 'R' or movement['dir'] == 'D':
                     direction = 1
                     if movement['dir'] == 'R':
@@ -150,6 +136,7 @@ def rope(dir,distance):
 
                 pygame.draw.rect(screen, start_c, [start_x, start_y, block_size,block_size])
                 pygame.draw.rect(screen, head_c, [head_x, head_y, block_size,block_size])
+                print_tail_positions(tail_positions,screen,block_size,orange)
                 if (tail_x < head_x - block_size):
                     tail_x = head_x - block_size
                     if tail_y != head_y:
@@ -163,11 +150,6 @@ def rope(dir,distance):
                 if (tail_y > head_y + block_size):
                     tail_x = head_x
                     tail_y = head_y + block_size
-                if ((tail_x,tail_y) not in tail_positions):
-                    print(tail_positions)
-                    tail_positions.append((tail_x,tail_y))
-                else:
-                    print((tail_x,tail_y),"already exists!")
                 pygame.draw.rect(screen, tail_c, [tail_x, tail_y, block_size,block_size])
                     
                 text_x,text_y = smallfont.size(f"{instruction}: {movement['dir']} {movement['steps']}")
@@ -179,60 +161,8 @@ def rope(dir,distance):
                 screen.blit(text5, (res[0]/2 - (text5_x/2), res[1]-700))
         clock.tick(speed)
         pygame.display.update()
-
-def rope_simple(dir,distance):
-    tail_positions = []
-    block_size = 10
-    df_movements = pd.DataFrame({'dir':dir,'steps':distance})
-    steps = df_movements.iloc[0]['steps']
-    dist = steps
-    max_steps = int(max(df_movements.steps))
-
-    while max_steps*block_size > res[0]:
-        block_size = int( block_size / 2)
-
-    head_x = 0
-    head_y = 0
-    tail_x = head_x
-    tail_y = head_y
-    tail_positions.append((tail_x,tail_y))
-    while len(df_movements) > 0:
-        if steps == dist:
-            movement = df_movements.iloc[0]
-            df_movements = df_movements.iloc[1: , :]
-            dist = movement['steps']
-            steps = 1
-        else:
-            steps += 1
-        if movement['dir'] == 'R' or movement['dir'] == 'D':
-            direction = 1
-            if movement['dir'] == 'R':
-                head_x += direction * block_size
-            else:
-                head_y += direction * block_size
-        else:
-            direction = -1
-            if movement['dir'] == 'L':
-                head_x += direction * block_size
-            else:
-                head_y += direction * block_size
-        if (tail_x < head_x - block_size):
-            tail_x = head_x - block_size
-            if tail_y != head_y:
-                tail_y = head_y
-        if (tail_x > head_x + block_size):
-            tail_y = head_y
-            tail_x = head_x + block_size
-        if (tail_y < head_y - block_size):
-            tail_x = head_x
-            tail_y = head_y - block_size
-        if (tail_y > head_y + block_size):
-            tail_x = head_x
-            tail_y = head_y + block_size
-        if ((tail_x,tail_y) not in tail_positions):
-            print((tail_x,tail_y))
-            tail_positions.append((tail_x,tail_y))
     return len(tail_positions)
+
 
 def read_head_movements(file):
     dir = []
@@ -244,6 +174,7 @@ def read_head_movements(file):
         steps.append(int(line[1]))
     return (dir,steps)
 
-dir,steps = read_head_movements('input9_b.txt')
-#rope(dir,steps)
-print(rope_simple(dir,steps))
+dir,steps = read_head_movements('input9.txt')
+#print("Unique tail positions:",rope_simple(dir,steps))
+print("Unique tail positions:",rope(dir,steps))
+
