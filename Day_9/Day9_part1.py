@@ -175,6 +175,5 @@ def read_head_movements(file):
     return (dir,steps)
 
 dir,steps = read_head_movements('input9.txt')
-#print("Unique tail positions:",rope_simple(dir,steps))
 print("Unique tail positions:",rope(dir,steps))
 

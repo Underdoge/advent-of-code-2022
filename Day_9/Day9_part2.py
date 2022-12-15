@@ -7,7 +7,7 @@ def print_tail_positions(tail_positions,screen,block_size,tail_c):
     for pos in tail_positions:
         pygame.draw.rect(screen, tail_c, [pos[0], pos[1], block_size,block_size])
 
-def rope_part2(dir,distance):
+def rope(dir,distance,knots_num):
     pygame.init()
     screen = pygame.display.set_mode()
     width, height = screen.get_size()
@@ -25,7 +25,6 @@ def rope_part2(dir,distance):
     start_c = blue
     tail_c = red
     speed = 60
-    knots_num = 10
     tail_positions = []
     knots= []
     milisecs = 50
@@ -43,7 +42,7 @@ def rope_part2(dir,distance):
     start_y = head_y
     for i in range(knots_num):
         knots.append([head_x,head_y])
-    tail_positions.append((knots[9][0],knots[9][1]))
+    tail_positions.append((knots[knots_num-1][0],knots[knots_num-1][1]))
     time = int(pygame.time.get_ticks() / milisecs)
     smallfont = pygame.font.SysFont('Anonymice Powerline', 35)
     text2 = smallfont.render(f"Press 'r' to restart, 'p' to pause or 'q' to exit ...", True, white)
@@ -92,8 +91,8 @@ def rope_part2(dir,distance):
                 time += 1
             if key[pygame.K_p]: # pause
                 started = False
-            if ((knots[9][0],knots[9][1]) not in tail_positions):
-                tail_positions.append((knots[9][0],knots[9][1]))
+            if ((knots[knots_num-1][0],knots[knots_num-1][1]) not in tail_positions):
+                tail_positions.append((knots[knots_num-1][0],knots[knots_num-1][1]))
             if len(df_movements) == 0 and steps == dist:
                 if key[pygame.K_q]: # quit
                     running = False
@@ -131,8 +130,8 @@ def rope_part2(dir,distance):
                         pygame.draw.rect(screen, violet, [knots[i][0], knots[i][1], block_size,block_size])
                     else:
                         pygame.draw.rect(screen, tail_c, [knots[i][0], knots[i][1], block_size,block_size])
-                if ((knots[9][0],knots[9][1]) not in tail_positions):
-                    tail_positions.append((knots[9][0],knots[9][1]))
+                if ((knots[knots_num-1][0],knots[knots_num-1][1]) not in tail_positions):
+                    tail_positions.append((knots[knots_num-1][0],knots[knots_num-1][1]))
                 screen.blit(text2, (res[0]/2 - (text2_x/2), res[1]-50))
                 text5 = smallfont.render(f"Tail positions: {len(tail_positions)}", True, white)
                 text5_x,text5_y = smallfont.size(f"Tail positions: {len(tail_positions)}")
@@ -214,8 +213,8 @@ def rope_part2(dir,distance):
         pygame.display.update()
     return len(tail_positions)
 
-def rope_part2_simple(dir,distance):
-    knots_num = 10
+def rope_part1_simple(dir,distance):
+    knots_num = 2
     tail_positions = []
     knots= []
     df_movements = pd.DataFrame({'dir':dir,'steps':distance})
@@ -227,8 +226,67 @@ def rope_part2_simple(dir,distance):
         knots.append([head_x,head_y])
     tail_positions.append(str((head_x,head_y)))
     while len(df_movements) >= 0 and steps <= dist:
-        if (str((knots[9][0],knots[9][1])) not in tail_positions):
-            tail_positions.append(str((knots[9][0],knots[9][1])))
+        if (str((knots[1][0],knots[1][1])) not in tail_positions):
+            tail_positions.append(str((knots[1][0],knots[1][1])))
+        if steps == dist and len(df_movements) > 0:
+            movement = df_movements.iloc[0]
+            df_movements = df_movements.iloc[1: , :]
+            dist = movement['steps']
+            steps = 1
+        else:
+            steps += 1
+        if movement['dir'] == 'R' or movement['dir'] == 'U':
+            direction = 1
+            if movement['dir'] == 'R':
+                knots[0][0] += direction
+            else:
+                knots[0][1] += direction
+        else:
+            direction = -1
+            if movement['dir'] == 'L':
+                knots[0][0] += direction
+            else:
+                knots[0][1] += direction
+        for i in range(1,knots_num):
+            if (math.dist([knots[i][0],knots[i][1]],[knots[i-1][0],knots[i-1][1]]) > 2.8):
+                if knots[i][0] < knots[i-1][0]:
+                    knots[i][0] += int(abs(knots[i][0] - knots[i-1][0])/2)
+                if knots[i][0] > knots[i-1][0]:
+                    knots[i][0] -= int(abs(knots[i][0] - knots[i-1][0])/2)
+                if knots[i][1] < knots[i-1][1]:
+                    knots[i][1] += int(abs(knots[i][1] - knots[i-1][1])/2)
+                if knots[i][1] > knots[i-1][1]:
+                    knots[i][1] -= int(abs(knots[i][1] - knots[i-1][1])/2)
+            else:
+                if (knots[i][0] < knots[i-1][0] - 1):
+                    knots[i][0] = knots[i-1][0] - 1
+                    if knots[i][1] != knots[i-1][1]:
+                        knots[i][1] = knots[i-1][1]
+                if (knots[i][0] > knots[i-1][0] + 1):
+                    knots[i][1] = knots[i-1][1]
+                    knots[i][0] = knots[i-1][0] + 1
+                if (knots[i][1] < knots[i-1][1] - 1):
+                    knots[i][0] = knots[i-1][0]
+                    knots[i][1] = knots[i-1][1] - 1
+                if (knots[i][1] > knots[i-1][1] + 1):
+                    knots[i][0] = knots[i-1][0]
+                    knots[i][1] = knots[i-1][1] + 1
+    return len(tail_positions)
+
+def rope_simple(dir,distance,knots_num):
+    tail_positions = []
+    knots= []
+    df_movements = pd.DataFrame({'dir':dir,'steps':distance})
+    steps = df_movements.iloc[0]['steps']
+    dist = steps
+    head_x = 0
+    head_y = 0
+    for i in range(knots_num):
+        knots.append([head_x,head_y])
+    tail_positions.append(str((head_x,head_y)))
+    while len(df_movements) >= 0 and steps <= dist:
+        if (str((knots[knots_num-1][0],knots[knots_num-1][1])) not in tail_positions):
+            tail_positions.append(str((knots[knots_num-1][0],knots[knots_num-1][1])))
         if steps == dist and len(df_movements) > 0:
             movement = df_movements.iloc[0]
             df_movements = df_movements.iloc[1: , :]
@@ -285,4 +343,4 @@ def read_head_movements(file):
     return (dir,steps)
 
 dir,steps = read_head_movements('input9.txt')
-print("Unique tail positions:",rope_part2(dir,steps))
+print("Part 2 tail positions:",rope(dir,steps,10))
