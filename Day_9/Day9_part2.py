@@ -318,9 +318,8 @@ def rope_simple(dir,distance,knots_num):
                     knots[i][1] -= int(abs(knots[i][1] - knots[i-1][1])/2)
             else:
                 if (knots[i][0] < knots[i-1][0] - 1):
+                    knots[i][1] = knots[i-1][1]
                     knots[i][0] = knots[i-1][0] - 1
-                    if knots[i][1] != knots[i-1][1]:
-                        knots[i][1] = knots[i-1][1]
                 if (knots[i][0] > knots[i-1][0] + 1):
                     knots[i][1] = knots[i-1][1]
                     knots[i][0] = knots[i-1][0] + 1
@@ -343,4 +342,4 @@ def read_head_movements(file):
     return (dir,steps)
 
 dir,steps = read_head_movements('input9.txt')
-print("Part 2 tail positions:",rope(dir,steps,10))
+print("Part 2 tail positions:",rope_simple(dir,steps,2))

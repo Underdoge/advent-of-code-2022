@@ -138,9 +138,8 @@ def rope(dir,distance):
                 pygame.draw.rect(screen, head_c, [head_x, head_y, block_size,block_size])
                 print_tail_positions(tail_positions,screen,block_size,orange)
                 if (tail_x < head_x - block_size):
-                    tail_x = head_x - block_size
-                    if tail_y != head_y:
-                        tail_y = head_y
+                    tail_y = head_y
+                    tail_x = head_x - block_size                        
                 if (tail_x > head_x + block_size):
                     tail_y = head_y
                     tail_x = head_x + block_size
