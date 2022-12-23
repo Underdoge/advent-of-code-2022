@@ -20,7 +20,8 @@ def read_monkeys_pt2(file):
         if i == 2:
             monkey['operation'] = line[17::].split(" ")
         if i == 3:
-            monkey['test'] = int(line.split(" ")[3])
+            monkey['test'] = int_to_array(int(line.split(" ")[3]))
+            print(f"Divisible by {int_to_array(int(line.split(' ')[3]))}")
         if i == 4:
             monkey['true'] = int(line.split(" ")[5])
         if i == 5:
@@ -55,6 +56,33 @@ def array_add(array,x):
     if carry != 0:
         sum.insert(0,carry)
     return sum
+
+def array_diff(array,x):
+    print(array,x)
+    diff = []
+    carry = 0
+    i = len(x)
+    j = len(array)
+    while i > 0:
+        if (array[j-1] > x[i-1]):
+            diff.insert(0,(array[j-1] - x[i-1] - carry) % 10)
+            carry = 0
+        elif (array[j-1] < x[i-1]):
+            diff.insert(0,(10+array[j-1] - x[i-1] - carry) % 10)
+            carry = 1
+        i -= 1
+        j -= 1
+    if carry == 1:
+        diff.insert(0,array[j-1] - carry)
+    while len(array) - len(diff) > 0:
+        diff.insert(0,array[j])
+        j -= 1
+
+    return diff
+
+array = [1,2,3,4,5]
+diff = [1,3]
+print(array_diff(array,diff))
 
 def array_mult_one_digit(array,x):
     mult = []
@@ -149,15 +177,17 @@ def array_mult(array_1,array_2):
 def array_divisible_by(array,divisor):
     divisable = False
     print("testing divisable",array,"by",divisor,end="")
-    if divisor == 2:
-        if array[-1] % 2 == 0:
-            divisable = True
-    elif divisor == 3:
-        if array[-1] == 3 or array[-1] == 6 or array[-1] == 9:
-            divisable = True
-    elif divisor == 5:
-        if array[-1] == 0 or array[-1] == 5:
-            divisable = True
+    if len(divisor) < 2:
+        if divisor[0] == "2":
+            if array[-1] % 2 == 0:
+                divisable = True
+        elif divisor == "3":
+            if array[-1] == 3 or array[-1] == 6 or array[-1] == 9:
+                divisable = True
+        elif divisor == "5":
+            if array[-1] == 0 or array[-1] == 5:
+                divisable = True
+
     print(":",divisable)
     return divisable
 
@@ -183,8 +213,8 @@ def monkey_business(monkeys,rounds):
                             new = array_mult_two_digits(item,y)
                         else:
                             new = array_mult_one_digit(item,y[0])
-                if array_divisible_by(new,int(monkey['test'])):
-                    print("inserting",new,"into monkey",int(monkey['true']))
+                if array_divisible_by(new,monkey['test']):
+                    print("inserting",new,"into monkey",monkey['true'])
                     monkeys[int(monkey['true'])]['items'].insert(0,new)
                 else:
                     print("inserting",new,"into monkey",int(monkey['false']))
@@ -200,4 +230,4 @@ def monkey_business(monkeys,rounds):
     inspected.sort(reverse=True)
     return inspected[0]*inspected[1]
 
-monkey_business(read_monkeys_pt2('input11.txt'),2)
+#monkey_business(read_monkeys_pt2('input11.txt'),2)
