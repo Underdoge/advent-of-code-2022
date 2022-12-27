@@ -74,9 +74,10 @@ def array_diff(array,x):
         j -= 1
     if carry == 1:
         diff.insert(0,array[j-1] - carry)
-    while len(array) - len(diff) > 0:
-        diff.insert(0,array[j])
-        j -= 1
+    print(f"i {i} j {j}")
+    #while len(array) - len(diff) > 0:
+     #   diff.insert(0,array[j])
+      #  j -= 1
 
     return diff
 
