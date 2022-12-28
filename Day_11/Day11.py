@@ -41,25 +41,35 @@ def int_to_array(number):
     return array
 
 def array_to_int(array):
-    return int(str.join(array))
+    integer = ""
+    for num in array:
+        integer += str(num)
+    return int(integer)
 
 def array_add(array,x):
-    sum = []
+    if len(x) > len(array):
+        y = array
+        array = x
+        x = y
     carry = 0
     i = len(array)
-    sum.insert(0,(array[i-1] + x) % 10)
-    carry = int((array[i-1] + x) / 10)
-    i -= 1
-    while i > 0:
-        sum.insert(0,(array[i-1] + carry) % 10)
-        carry = int((array[i-1] + carry) / 10)
+    j = len(x)
+    k = 0
+    while j > 0:
+        array[-1 -k] = ((array[i-1] + x[j-1]) + carry) % 10
+        carry = int(((array[i-1] + x[j-1]) + carry) / 10)
+        j -= 1
         i -= 1
+        k += 1
     if carry != 0:
-        sum.insert(0,carry)
-    return sum
+        array[-1 -k] = array[i-1]+carry
+    return array
 
 def array_diff(array,x):
-    print(array,x)
+    if len(x) > len(array):
+        y = array
+        array = x
+        x = y
     carry = 0
     i = len(x)
     j = len(array)
@@ -170,39 +180,67 @@ def array_mult(array_1,array_2):
 
 def array_divisible_by(array,divisor):
     divisible = False
-    print("testing divisable",array,"by",divisor,end="")
+    print("testing divisable",array,"by",divisor)
     if len(divisor) < 2:
-        if divisor[0] == "2":
+        if divisor[0] == 2:
             if array[-1] % 2 == 0:
                 divisible = True
-        elif divisor == "3":
+        elif divisor[0] == 3:
             if array[-1] == 3 or array[-1] == 6 or array[-1] == 9:
                 divisible = True
-        elif divisor == "5":
+        elif divisor[0] == 5:
             if array[-1] == 0 or array[-1] == 5:
                 divisible = True
-        elif divisor == "7":
+        elif divisor[0] == 7:
             last = array[-1] * 2
             while len(array) > 1000:
                 array = array_diff(array,int_to_array(last))
+                last = array[-1] * 2
             if array_to_int(array) % 7 == 0:
-                divisible = True
 
-    print(":",divisible)
+                divisible = True
+    else:
+        if divisor == [1,1]:
+            print("divisor 11")
+            even = array[0::2]
+            odd = array[1::2]
+            even_sum = 0
+            odd_sum = 0
+            for num in even:
+                even_sum += num
+            for num in odd:
+                odd_sum += num
+            if even_sum == odd_sum:
+                divisible = True
+            else:
+                if array_to_int(array_diff(int_to_array(even_sum),int_to_array(odd_sum))) % 11 == 0:
+                    divisible = True
+        elif divisor == [1,3]:
+            last = array[-1] * 4
+            while len(array) > 1000:
+                array = array_add(array[:-1:],int_to_array(last))
+            if array_to_int(array) % 13 == 0:
+                divisible = True
+        elif divisor == [1,7]:
+            divisible = True
+        elif divisor == [1,9]:
+            divisible = False
+
+    print("divisable by",divisor,":",divisible)
     return divisible
 
 def monkey_business(monkeys,rounds):
     for i in range(rounds):
         for monkey in monkeys:
             to_delete = []
-            print("monkey",monkeys.index(monkey),"items",monkey['items'],"operation",monkey['operation'],"test divisable by",monkey['test'],"true",monkey['true'],"false",monkey['false'])
+            #print("monkey",monkeys.index(monkey),"items",monkey['items'],"operation",monkey['operation'],"test divisable by",monkey['test'],"true",monkey['true'],"false",monkey['false'])
             for item in monkey['items']:
                 to_delete.append(item)
                 if monkey['operation'][2] == 'old':
                     y = item
                     if monkey['operation'][1] == '*':
                         new = array_mult(item,y)
-                        print("round",i,"monkey",monkeys.index(monkey),"array mult: ",item,"*",y,"=",new)
+                        #print("round",i,"monkey",monkeys.index(monkey),"array mult: ",item,"*",y,"=",new)
                 else:
                     if monkey['operation'][1] == '+':
                         y = int(monkey['operation'][2])
@@ -214,10 +252,10 @@ def monkey_business(monkeys,rounds):
                         else:
                             new = array_mult_one_digit(item,y[0])
                 if array_divisible_by(new,monkey['test']):
-                    print("inserting",new,"into monkey",monkey['true'])
+                    #print("inserting",new,"into monkey",monkey['true'])
                     monkeys[int(monkey['true'])]['items'].insert(0,new)
                 else:
-                    print("inserting",new,"into monkey",int(monkey['false']))
+                    #print("inserting",new,"into monkey",int(monkey['false']))
                     monkeys[int(monkey['false'])]['items'].insert(0,new)
             for item in to_delete:
                 monkey['inspected'] += 1
@@ -231,6 +269,7 @@ def monkey_business(monkeys,rounds):
     return inspected[0]*inspected[1]
 
 tic = time.perf_counter()
-monkey_business(read_monkeys_pt2('test.txt'),20)
+print(array_divisible_by([4,4,2],[1,3]))
+#monkey_business(read_monkeys_pt2('input11.txt'),20)
 toc = time.perf_counter()
 print(f"Took {toc - tic:0.4f} seconds")
