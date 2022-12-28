@@ -1,4 +1,4 @@
-import pandas as pd
+import time
 
 def print_monkeys(monkeys):
     for monkey in monkeys:
@@ -32,8 +32,6 @@ def read_monkeys_pt2(file):
         i += 1
         if i == 7:
             i = 0
-    #monks = pd.Series(monkeys)
-    #print(monks.apply(lambda x: "Divisible by " + str(x['test'])))
     return monkeys
 
 def int_to_array(number):
@@ -41,6 +39,9 @@ def int_to_array(number):
     for i in str(number)[::1]:
         array.append(int(i))
     return array
+
+def array_to_int(array):
+    return int(str.join(array))
 
 def array_add(array,x):
     sum = []
@@ -59,31 +60,23 @@ def array_add(array,x):
 
 def array_diff(array,x):
     print(array,x)
-    diff = []
     carry = 0
     i = len(x)
     j = len(array)
+    k = 0
     while i > 0:
-        if (array[j-1] > x[i-1]):
-            diff.insert(0,(array[j-1] - x[i-1] - carry) % 10)
+        if (array[j-1] >= x[i-1]):
+            array[-1 -k] = (array[j-1] - x[i-1] - carry) % 10
             carry = 0
         elif (array[j-1] < x[i-1]):
-            diff.insert(0,(10+array[j-1] - x[i-1] - carry) % 10)
+            array[-1 -k] = (10+array[j-1] - x[i-1] - carry) % 10
             carry = 1
         i -= 1
         j -= 1
+        k += 1
     if carry == 1:
-        diff.insert(0,array[j-1] - carry)
-    print(f"i {i} j {j}")
-    #while len(array) - len(diff) > 0:
-     #   diff.insert(0,array[j])
-      #  j -= 1
-
-    return diff
-
-array = [1,2,3,4,5]
-diff = [1,3]
-print(array_diff(array,diff))
+        array[-1 -k] = array[j-1] - carry
+    return array
 
 def array_mult_one_digit(array,x):
     mult = []
@@ -176,21 +169,27 @@ def array_mult(array_1,array_2):
     return array_sums
 
 def array_divisible_by(array,divisor):
-    divisable = False
+    divisible = False
     print("testing divisable",array,"by",divisor,end="")
     if len(divisor) < 2:
         if divisor[0] == "2":
             if array[-1] % 2 == 0:
-                divisable = True
+                divisible = True
         elif divisor == "3":
             if array[-1] == 3 or array[-1] == 6 or array[-1] == 9:
-                divisable = True
+                divisible = True
         elif divisor == "5":
             if array[-1] == 0 or array[-1] == 5:
-                divisable = True
+                divisible = True
+        elif divisor == "7":
+            last = array[-1] * 2
+            while len(array) > 1000:
+                array = array_diff(array,int_to_array(last))
+            if array_to_int(array) % 7 == 0:
+                divisible = True
 
-    print(":",divisable)
-    return divisable
+    print(":",divisible)
+    return divisible
 
 def monkey_business(monkeys,rounds):
     for i in range(rounds):
@@ -231,4 +230,7 @@ def monkey_business(monkeys,rounds):
     inspected.sort(reverse=True)
     return inspected[0]*inspected[1]
 
-#monkey_business(read_monkeys_pt2('input11.txt'),2)
+tic = time.perf_counter()
+monkey_business(read_monkeys_pt2('test.txt'),20)
+toc = time.perf_counter()
+print(f"Took {toc - tic:0.4f} seconds")
