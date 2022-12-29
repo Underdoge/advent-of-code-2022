@@ -47,6 +47,7 @@ def array_to_int(array):
     return int(integer)
 
 def array_add(array,x):
+    print("adding array",array,"+ ",x)
     if len(x) > len(array):
         y = array
         array = x
@@ -56,17 +57,24 @@ def array_add(array,x):
     j = len(x)
     k = 0
     while j > 0:
-        array[-1 -k] = ((array[i-1] + x[j-1]) + carry) % 10
-        carry = int(((array[i-1] + x[j-1]) + carry) / 10)
+        sum = ((array[i-1] + x[j-1]) + carry)
+        array[-1 -k] = sum % 10
+        carry = int(sum / 10)
         j -= 1
         i -= 1
         k += 1
+    print("array",array,"carry",carry)
     if carry != 0:
-        array[-1 -k] = array[i-1]+carry
+        if i == 0:
+            array.insert(0,array[i-1]+carry)
+        else:
+            array[-1 -k] = array[i-1]+carry
+    print("final array",array)
     return array
 
 def array_diff(array,x):
-    if len(x) > len(array):
+    print("array diff",array,"-",x)
+    if len(x) > len(array) or array_to_int(x) > array_to_int(array):
         y = array
         array = x
         x = y
@@ -84,6 +92,7 @@ def array_diff(array,x):
         i -= 1
         j -= 1
         k += 1
+    print("array",array,"carry",carry)
     if carry == 1:
         array[-1 -k] = array[j-1] - carry
     return array
@@ -179,6 +188,7 @@ def array_mult(array_1,array_2):
     return array_sums
 
 def array_divisible_by(array,divisor):
+    original_array = array
     divisible = False
     print("testing divisable",array,"by",divisor)
     if len(divisor) < 2:
@@ -197,7 +207,6 @@ def array_divisible_by(array,divisor):
                 array = array_diff(array,int_to_array(last))
                 last = array[-1] * 2
             if array_to_int(array) % 7 == 0:
-
                 divisible = True
     else:
         if divisor == [1,1]:
@@ -213,6 +222,7 @@ def array_divisible_by(array,divisor):
             if even_sum == odd_sum:
                 divisible = True
             else:
+                print("odd sum",odd_sum,"even sum",even_sum)
                 if array_to_int(array_diff(int_to_array(even_sum),int_to_array(odd_sum))) % 11 == 0:
                     divisible = True
         elif divisor == [1,3]:
@@ -222,11 +232,20 @@ def array_divisible_by(array,divisor):
             if array_to_int(array) % 13 == 0:
                 divisible = True
         elif divisor == [1,7]:
-            divisible = True
+            last = array[-1] * 9
+            sum = array_add(array_mult_one_digit(array[:-1:],5),int_to_array(last))            
+            if array_to_int(sum) % 17 == 0:
+                divisible = True
         elif divisor == [1,9]:
-            divisible = False
+            last = array[-1] * 2
+            array = array_add(array[:-1:],int_to_array(last))
+            while len(array) > 1000:
+                last = array[-1] * 2
+                array = array_add(array[:-1:],int_to_array(last))
+            if array_to_int(array) % 19 == 0:
+                divisible = True
 
-    print("divisable by",divisor,":",divisible)
+    print(original_array,"divisable by",divisor,":",divisible)
     return divisible
 
 def monkey_business(monkeys,rounds):
@@ -244,7 +263,7 @@ def monkey_business(monkeys,rounds):
                 else:
                     if monkey['operation'][1] == '+':
                         y = int(monkey['operation'][2])
-                        new = array_add(item,y)
+                        new = array_add(item,[y])
                     else:
                         y = int_to_array(monkey['operation'][2])
                         if len(y) > 1:
@@ -269,7 +288,7 @@ def monkey_business(monkeys,rounds):
     return inspected[0]*inspected[1]
 
 tic = time.perf_counter()
-print(array_divisible_by([4,4,2],[1,3]))
-#monkey_business(read_monkeys_pt2('input11.txt'),20)
+#print(array_divisible_by([3,6,1],[1,9]))
+monkey_business(read_monkeys_pt2('test.txt'),20)
 toc = time.perf_counter()
 print(f"Took {toc - tic:0.4f} seconds")
