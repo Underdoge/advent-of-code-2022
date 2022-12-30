@@ -1,4 +1,5 @@
 import time
+import functools
 
 def print_monkeys(monkeys):
     for monkey in monkeys:
@@ -40,10 +41,7 @@ def int_to_array(number):
     return array
 
 def array_to_int(array):
-    integer = ""
-    for num in array:
-        integer += str(num)
-    return int(integer)
+    return functools.reduce(lambda total, d: 10 * total + d, array, 0)
 
 def array_add(array,x):
     if len(x) > len(array):
@@ -255,25 +253,36 @@ def monkey_business(monkeys,rounds):
                 if monkey['operation'][2] == 'old':
                     y = item
                     if monkey['operation'][1] == '*':
+                        print(i,"doing item ^ 2")
                         new = array_mult(item,y)
+                        print(i,"done doing item ^ 2")
                 else:
                     if monkey['operation'][1] == '+':
                         y = int(monkey['operation'][2])
+                        print(i,"doing item + y")
                         new = array_add(item,[y])
+                        print(i,"done doing item + y")
                     else:
                         y = int_to_array(monkey['operation'][2])
                         if len(y) > 1:
+                            print(i,"doing item * y (two digits)")
                             new = array_mult_two_digits(item,y)
+                            print(i,"done doing item * y (two digits)")
                         else:
+                            print(i,"doing item * y (one digit)")
                             new = array_mult_one_digit(item,y[0])
+                            print(i,"done doing item * y (one digit)")
                 if array_divisible_by(new,monkey['test']):
+                    print(i,"inserting true")
                     monkeys[int(monkey['true'])]['items'].insert(0,new)
                 else:
+                    print(i,"inserting false")
                     monkeys[int(monkey['false'])]['items'].insert(0,new)
             for item in to_delete:
                 monkey['inspected'] += 1
+                print(i,"deleting")
                 monkey['items'].remove(item)
-        #print_monkeys(monkeys)
+                print(i,"done deleting")
     inspected = []
     for monkey in monkeys:
         print(f"Inspected {monkey['inspected']}")
