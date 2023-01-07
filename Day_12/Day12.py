@@ -86,27 +86,30 @@ def walk_map(start,end,steps,map,results):
     if start != end:
         if (start_y,start_x + 1) not in steps and start_x + 1 <= len(map[0]) - 1 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y][start_x + 1])):
             steps[start] = ">"
+            print (">",end="")
             walk_map((start_y,start_x + 1),end,steps.copy(),map,results)
         if (start_y,start_x - 1) not in steps and start_x - 1 >= 0 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y][start_x - 1])):
             steps[start] = "<"
+            print ("<",end="")
             walk_map((start_y,start_x - 1),end,steps.copy(),map,results)
         if (start_y + 1,start_x) not in steps and start_y + 1 <= len(map) - 1 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y + 1][start_x])):
             steps[start] = "v"
+            print ("v",end="")
             walk_map((start_y + 1,start_x),end,steps.copy(),map,results)
         if (start_y - 1,start_x) not in steps and start_y - 1 >= 0 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y - 1][start_x])):
             steps[start] = "^"
+            print ("^",end="")
             walk_map((start_y - 1,start_x),end,steps.copy(),map,results)
     else:
         steps[start] = "E"
+        print("E")
         results.append(steps)
     return results
         
-map = read_map("/Users/echapa/advent-of-code-2022/Day_12/test.txt")
-print_map(map)
+map = read_map("input12.txt")
 start = find_start(map)
 end = find_end(map)
+print("Start:",start,"End:",end,"Len y",len(map),"Len x",len(map[0]))
 y,x = end
 map[y][x] = 'z'
 print("Fewest steps:",fewest_steps(walk_map(start,end,{},map,[])))
-
-
