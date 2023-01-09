@@ -1,7 +1,45 @@
 
+import pygame
+
+pygame.init()
+block_size = 8
+screen = pygame.display.set_mode()
+width, height = screen.get_size()
+res = (width -100, height -200)
+screen = pygame.display.set_mode(res)
+clock = pygame.time.Clock()
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+white = (255, 255, 255)
+orange = (255, 165, 0)
+start_c = green
+unset = white
+speed = 1000
+smallfont = pygame.font.SysFont('Anonymice Powerline', block_size)
+end_text = smallfont.render(f"E", True, white)
+
 def print_map(map):
     for line in map:
         print(line)
+
+def draw_steps(map,steps,end):
+    end_y,end_x = end
+    screen.fill((65, 25, 64))
+    #print("\nLen(steps):",len(steps))
+    y = 0
+    while y < len(map):
+        x = 0
+        while x < len(map[0]):
+            if y == end_y and x == end_x:
+                screen.blit(end_text, ((x * block_size) + block_size/4, (y * block_size)))
+            else:
+                if (y,x) in steps:
+                        pygame.draw.rect(screen, start_c, [x * block_size, y * block_size, block_size, block_size])
+                else:
+                    pygame.draw.rect(screen, unset, [(x * block_size) + block_size/4,(y * block_size) + block_size/4, block_size/2, block_size/2])
+            x += 1
+        y += 1
 
 def print_steps(map,steps,end):
     end_y,end_x = end
@@ -86,19 +124,25 @@ def walk_map(start,end,steps,map,results):
     if start != end:
         if (start_y,start_x + 1) not in steps and start_x + 1 <= len(map[0]) - 1 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y][start_x + 1])):
             steps[start] = ">"
-            print (">",end="")
+            draw_steps(map,steps,end)
             walk_map((start_y,start_x + 1),end,steps.copy(),map,results)
         if (start_y,start_x - 1) not in steps and start_x - 1 >= 0 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y][start_x - 1])):
             steps[start] = "<"
-            print ("<",end="")
+            draw_steps(map,steps,end)
+            clock.tick(speed)
+            pygame.display.update()
             walk_map((start_y,start_x - 1),end,steps.copy(),map,results)
         if (start_y + 1,start_x) not in steps and start_y + 1 <= len(map) - 1 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y + 1][start_x])):
             steps[start] = "v"
-            print ("v",end="")
+            draw_steps(map,steps,end)
+            clock.tick(speed)
+            pygame.display.update()
             walk_map((start_y + 1,start_x),end,steps.copy(),map,results)
         if (start_y - 1,start_x) not in steps and start_y - 1 >= 0 and (is_start(map,start_x,start_y) or ord(map[start_y][start_x]) + 1 >= ord(map[start_y - 1][start_x])):
             steps[start] = "^"
-            print ("^",end="")
+            draw_steps(map,steps,end)
+            clock.tick(speed)
+            pygame.display.update()
             walk_map((start_y - 1,start_x),end,steps.copy(),map,results)
     else:
         steps[start] = "E"
@@ -112,4 +156,5 @@ end = find_end(map)
 print("Start:",start,"End:",end,"Len y",len(map),"Len x",len(map[0]))
 y,x = end
 map[y][x] = 'z'
+screen.fill((65, 25, 64))
 print("Fewest steps:",fewest_steps(walk_map(start,end,{},map,[])))

@@ -2,8 +2,6 @@
 import pandas as pd
 import pygame
 
-
-
 def print_tail_positions(tail_positions,screen,block_size,tail_c):
     for pos in tail_positions:
         pygame.draw.rect(screen, tail_c, [pos[0], pos[1], block_size,block_size])
@@ -71,7 +69,7 @@ def rope(dir,distance):
             else:
                 started = True
 
-        pygame.draw.rect(screen, start_c, [start_x, start_y, block_size,block_size])         
+        pygame.draw.rect(screen, start_c, [start_x, start_y, block_size,block_size])
         pygame.draw.rect(screen, head_c, [head_x, head_y, block_size,block_size])   
         if int(pygame.time.get_ticks() / milisecs) > time and started:
             time = int(pygame.time.get_ticks() / milisecs)
